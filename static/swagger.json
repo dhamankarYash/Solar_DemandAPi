@@ -1,0 +1,136 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Electricity Demand & Solar API",
+    "description": "API to predict electricity demand, compare it with solar potential, compare between states, and view 5-year trends.",
+    "version": "1.0.1"
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/predict-demand": {
+      "get": {
+        "summary": "Predict electricity demand (GWh)",
+        "parameters": [
+          { "name": "state", "in": "query", "required": true, "type": "string" },
+          { "name": "year", "in": "query", "required": true, "type": "integer" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Predicted demand",
+            "schema": { "$ref": "#/definitions/DemandResponse" }
+          }
+        }
+      }
+    },
+    "/demand-vs-solar": {
+      "get": {
+        "summary": "Compare demand vs. solar potential",
+        "parameters": [
+          { "name": "state", "in": "query", "required": true, "type": "string" },
+          { "name": "year", "in": "query", "required": true, "type": "integer" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Demand vs. solar comparison",
+            "schema": { "$ref": "#/definitions/SolarCoverageResponse" }
+          }
+        }
+      }
+    },
+    "/states": {
+      "get": {
+        "summary": "Get list of available states",
+        "responses": {
+          "200": {
+            "description": "List of states",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "available_states": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compare": {
+      "get": {
+        "summary": "Compare demand between two states",
+        "parameters": [
+          { "name": "stateA", "in": "query", "required": true, "type": "string" },
+          { "name": "stateB", "in": "query", "required": true, "type": "string" },
+          { "name": "year", "in": "query", "required": true, "type": "integer" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Demand comparison between two states",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "year": { "type": "integer" },
+                "stateA": { "type": "number" },
+                "stateB": { "type": "number" },
+                "difference_gwh": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/forecast/trend": {
+      "get": {
+        "summary": "Get 5-year electricity consumption trend",
+        "parameters": [
+          { "name": "state", "in": "query", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": {
+            "description": "5-year consumption trend",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "state": { "type": "string" },
+                "trend": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "year": { "type": "integer" },
+                      "consumption_gwh": { "type": "number" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DemandResponse": {
+      "type": "object",
+      "properties": {
+        "state": { "type": "string" },
+        "year": { "type": "integer" },
+        "predicted_demand_gwh": { "type": "number" }
+      }
+    },
+    "SolarCoverageResponse": {
+      "type": "object",
+      "properties": {
+        "year": { "type": "integer" },
+        "state": { "type": "string" },
+        "predicted_demand_gwh": { "type": "number" },
+        "solar_generation_gwh": { "type": "number" },
+        "solar_coverage_percent": { "type": "number" },
+        "summary": { "type": "string" }
+      }
+    }
+  }
+}
