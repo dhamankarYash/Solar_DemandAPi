@@ -1,0 +1,57 @@
+# Python-related ignores:
+# Ignore Python bytecode files
+_pycache_/
+*.py[cod]
+*$py.class
+
+# Virtual environment directories (common names)
+venv/
+env/
+.env/
+.venv/
+
+# IDE/editor specific ignores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Django specific files (if using Django)
+*.log
+*.pot
+*.pyc
+*.db
+*.sqlite3
+/static/
+*.bak
+
+# Test & Coverage directories
+.coverage
+.tox/
+.nox/
+dist/
+build/
+*.egg-info/
+
+# React-related ignores:
+# Node modules (big and should not be tracked)
+node_modules/
+
+# Build directories (React build artifacts)
+build/
+public/
+
+# React-specific configuration files
+.eslintcache
+
+# MacOS-specific ignores (if using MacOS)
+.DS_Store
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment configuration
+.env.local
+.env.*.local

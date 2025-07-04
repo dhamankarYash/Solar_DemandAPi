@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Energy Demand</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-8 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-2 bg-white/20 rounded-lg">
+                    <i data-lucide="leaf" class="h-8 w-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold">Solar Energy Demand</h1>
+                    <p class="text-emerald-100">Predict electricity demand and analyze solar potential</p>
+                </div>
+            </div>
+            <div class="flex gap-4 text-sm">
+                <span class="bg-white/20 text-white border border-white/30 px-3 py-1 rounded-full flex items-center">
+                    <i data-lucide="sun" class="h-3 w-3 mr-1"></i>
+                    Solar Energy Demand
+                </span>
+                <span class="bg-white/20 text-white border border-white/30 px-3 py-1 rounded-full flex items-center">
+                    <i data-lucide="zap" class="h-3 w-3 mr-1"></i>
+                    Electricity Demand
+                </span>
+                <span class="bg-white/20 text-white border border-white/30 px-3 py-1 rounded-full flex items-center">
+                    <i data-lucide="trending-up" class="h-3 w-3 mr-1"></i>
+                    State Comparison
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Tab Navigation -->
+        <div class="mb-8">
+            <div class="grid grid-cols-3 bg-white shadow-sm rounded-lg">
+                <button onclick="showTab('solar')" id="solar-tab" class="px-4 py-3 text-center bg-emerald-500 text-white rounded-l-lg flex items-center justify-center gap-2">
+                    <i data-lucide="sun" class="h-4 w-4"></i>
+                    Solar Energy Demand
+                </button>
+                <button onclick="showTab('single')" id="single-tab" class="px-4 py-3 text-center bg-gray-100 text-gray-700 flex items-center justify-center gap-2">
+                    <i data-lucide="zap" class="h-4 w-4"></i>
+                    Electricity Demand
+                </button>
+                <button onclick="showTab('compare')" id="compare-tab" class="px-4 py-3 text-center bg-gray-100 text-gray-700 rounded-r-lg flex items-center justify-center gap-2">
+                    <i data-lucide="bar-chart-3" class="h-4 w-4"></i>
+                    Compare States
+                </button>
+            </div>
+        </div>
+
+        <!-- Solar Energy Demand Tab -->
+        <div id="solar-content" class="tab-content active space-y-6">
+            <div class="border-yellow-200 shadow-lg bg-white rounded-lg">
+                <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-t-lg">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="sun" class="h-5 w-5"></i>
+                        Solar Energy Demand Analysis
+                    </h2>
+                    <p class="text-yellow-100 mt-1">Discover how much electricity demand can be fulfilled with solar energy potential</p>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label for="solar-state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <select id="solar-state" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                <option value="">Select state</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="solar-year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                            <input type="number" id="solar-year" placeholder="e.g., 2025" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="handleSolarAnalysis()" id="solar-btn" class="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-semibold py-2 px-4 rounded-md transition-all">
+                                Analyze Solar Demand
+                            </button>
+                        </div>
+                    </div>
+                    <div id="solar-results" class="hidden space-y-6"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Electricity Demand Tab -->
+        <div id="single-content" class="tab-content space-y-6">
+            <div class="border-emerald-200 shadow-lg bg-white rounded-lg">
+                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6 rounded-t-lg">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="zap" class="h-5 w-5"></i>
+                        Electricity Demand Prediction
+                    </h2>
+                    <p class="text-emerald-100 mt-1">Get electricity demand predictions for any state and year</p>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label for="single-state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <select id="single-state" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">Select state</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="single-year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                            <input type="number" id="single-year" placeholder="e.g., 2025" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="handleSinglePrediction()" id="single-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-md transition-all">
+                                Predict Demand
+                            </button>
+                        </div>
+                    </div>
+                    <div id="single-results" class="hidden space-y-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compare States Tab -->
+        <div id="compare-content" class="tab-content space-y-6">
+            <div class="border-teal-200 shadow-lg bg-white rounded-lg">
+                <div class="bg-gradient-to-r from-teal-500 to-emerald-500 text-white p-6 rounded-t-lg">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="h-5 w-5"></i>
+                        Compare States
+                    </h2>
+                    <p class="text-teal-100 mt-1">Compare electricity demand between two states</p>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label for="state-a" class="block text-sm font-medium text-gray-700 mb-1">State A</label>
+                            <select id="state-a" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="">Select first state</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="state-b" class="block text-sm font-medium text-gray-700 mb-1">State B</label>
+                            <select id="state-b" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="">Select second state</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="compare-year" class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                            <input type="number" id="compare-year" placeholder="e.g., 2025" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="handleComparison()" id="compare-btn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-md transition-all">
+                                Compare
+                            </button>
+                        </div>
+                    </div>
+                    <div id="compare-results" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Energy Converter -->
+        <div class="border-emerald-200 shadow-lg bg-white rounded-lg mt-8">
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6 rounded-t-lg">
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                    <i data-lucide="calculator" class="h-5 w-5"></i>
+                    Energy Unit Converter
+                </h2>
+                <p class="text-emerald-100 mt-1">Convert between Gigawatt-hours (GWh) and Kilowatt-hours (kWh)</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="gwh-input" class="block text-sm font-medium text-gray-700 mb-1">Gigawatt-hours (GWh)</label>
+                        <input type="number" id="gwh-input" placeholder="Enter GWh value" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" oninput="convertGwhToKwh()">
+                    </div>
+                    <div>
+                        <label for="kwh-input" class="block text-sm font-medium text-gray-700 mb-1">Kilowatt-hours (kWh)</label>
+                        <input type="text" id="kwh-input" placeholder="Enter kWh value" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500" oninput="convertKwhToGwh()">
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-emerald-50 rounded-lg">
+                    <p class="text-sm text-emerald-700">
+                        <strong>Conversion:</strong> 1 GWh = 1,000,000 kWh
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let states = [];
+        let loading = false;
+        let trendChart = null;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            fetchStates();
+        });
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Reset all tab buttons
+            document.querySelectorAll('[id$="-tab"]').forEach(tab => {
+                tab.classList.remove('bg-emerald-500', 'text-white');
+                tab.classList.add('bg-gray-100', 'text-gray-700');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-content').classList.add('active');
+            
+            // Highlight selected tab
+            const activeTab = document.getElementById(tabName + '-tab');
+            activeTab.classList.remove('bg-gray-100', 'text-gray-700');
+            activeTab.classList.add('bg-emerald-500', 'text-white');
+        }
+
+        // Fetch available states
+        async function fetchStates() {
+            try {
+                const response = await fetch('/states');
+                const data = await response.json();
+                states = data.available_states || [];
+                populateStateDropdowns();
+            } catch (error) {
+                console.error('Failed to fetch states:', error);
+                showError('Failed to load states. Please check your connection.');
+            }
+        }
+
+        // Populate all state dropdowns
+        function populateStateDropdowns() {
+            const stateSelects = ['solar-state', 'single-state', 'state-a', 'state-b'];
+            stateSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Select state</option>';
+                states.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = state;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Solar analysis
+        async function handleSolarAnalysis() {
+        const state = document.getElementById('solar-state').value;
+        const year = document.getElementById('solar-year').value;
+
+        if (!state || !year) {
+        showError('Please select a state and enter a year');
+        return;
+        }
+
+        setLoading('solar-btn', true);
+
+        try {
+        const encodedState = encodeURIComponent(state.trim());
+        const response = await fetch(`/demand-vs-solar?state=${encodedState}&year=${year}`);
+        const data = await response.json();
+
+        if (data.error) {
+            showError('Error: ' + data.error);
+            return;
+        }
+
+        displaySolarResults(data);
+        } catch (error) {
+        console.error('Solar analysis failed:', error);
+        showError('Failed to analyze solar data. Please try again.');
+        } finally {
+        setLoading('solar-btn', false);
+        }
+    }
+
+        // Display solar analysis results
+        function displaySolarResults(data) {
+            const resultsDiv = document.getElementById('solar-results');
+            const coverageColor = data.solar_coverage_percent >= 70 ? 'green' : 
+                                 data.solar_coverage_percent >= 40 ? 'yellow' : 'red';
+            
+            const colorClasses = {
+                green: {
+                    bg: 'bg-green-50 border-green-500',
+                    text: 'text-green-800',
+                    progress: 'bg-gradient-to-r from-green-500 to-emerald-500'
+                },
+                yellow: {
+                    bg: 'bg-yellow-50 border-yellow-500',
+                    text: 'text-yellow-800',
+                    progress: 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                },
+                red: {
+                    bg: 'bg-red-50 border-red-500',
+                    text: 'text-red-800',
+                    progress: 'bg-gradient-to-r from-red-500 to-pink-500'
+                }
+            };
+
+            const colors = colorClasses[coverageColor];
+            
+            resultsDiv.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Main Metrics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-4 rounded-lg text-center">
+                            <i data-lucide="zap" class="h-8 w-8 mx-auto text-blue-600 mb-2"></i>
+                            <div class="text-2xl font-bold text-blue-700">${data.predicted_demand_gwh}</div>
+                            <div class="text-sm text-blue-600">Electricity Demand (GWh)</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-50 to-orange-100 border border-orange-200 p-4 rounded-lg text-center">
+                            <i data-lucide="sun" class="h-8 w-8 mx-auto text-orange-600 mb-2"></i>
+                            <div class="text-2xl font-bold text-orange-700">${data.solar_generation_gwh}</div>
+                            <div class="text-sm text-orange-600">Solar Generation (GWh)</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-100 border border-emerald-200 p-4 rounded-lg text-center">
+                            <i data-lucide="battery" class="h-8 w-8 mx-auto text-emerald-600 mb-2"></i>
+                            <div class="text-2xl font-bold text-emerald-700">${data.solar_coverage_percent}%</div>
+                            <div class="text-sm text-emerald-600">Solar Coverage</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 p-4 rounded-lg text-center">
+                            <i data-lucide="leaf" class="h-8 w-8 mx-auto text-purple-600 mb-2"></i>
+                            <div class="text-lg font-bold text-purple-700">${data.state}</div>
+                            <div class="text-sm text-purple-600">${data.year}</div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Summary Section -->
+                    <div class="border-2 border-emerald-200 shadow-xl bg-white rounded-lg">
+                        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-4 rounded-t-lg">
+                            <h3 class="text-lg font-bold flex items-center gap-2">
+                                <i data-lucide="trending-up" class="h-5 w-5"></i>
+                                Solar Energy Analysis Summary
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Visual Progress Bar -->
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm font-medium">
+                                        <span>Solar Coverage Progress</span>
+                                        <span>${data.solar_coverage_percent}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="h-3 rounded-full transition-all duration-1000 ${colors.progress}" style="width: ${Math.min(data.solar_coverage_percent, 100)}%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Summary Text with Enhanced Styling -->
+                                <div class="p-4 rounded-lg border-l-4 ${colors.bg}">
+                                    <div class="flex items-start gap-3">
+                                        <div class="p-2 rounded-full ${coverageColor === 'green' ? 'bg-green-100' : coverageColor === 'yellow' ? 'bg-yellow-100' : 'bg-red-100'}">
+                                            <i data-lucide="${coverageColor === 'green' ? 'sun' : coverageColor === 'yellow' ? 'battery' : 'zap'}" class="h-5 w-5 ${coverageColor === 'green' ? 'text-green-600' : coverageColor === 'yellow' ? 'text-yellow-600' : 'text-red-600'}"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm leading-relaxed ${colors.text}">${data.summary}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Insights -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                        <h4 class="font-semibold text-blue-800 mb-2">Energy Gap Analysis</h4>
+                                        <p class="text-sm text-blue-700">
+                                            ${data.predicted_demand_gwh > data.solar_generation_gwh
+                                                ? `Additional ${(data.predicted_demand_gwh - data.solar_generation_gwh).toFixed(2)} GWh needed from other sources`
+                                                : `Solar generation exceeds demand by ${(data.solar_generation_gwh - data.predicted_demand_gwh).toFixed(2)} GWh`}
+                                        </p>
+                                    </div>
+                                    <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                                        <h4 class="font-semibold text-emerald-800 mb-2">Environmental Impact</h4>
+                                        <p class="text-sm text-emerald-700">
+                                            Solar energy can provide clean, renewable power for ${data.solar_coverage_percent}% of ${data.state}'s electricity needs.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // Single state prediction
+async function handleSinglePrediction() {
+    const state = document.getElementById('single-state').value;
+    const year = document.getElementById('single-year').value;
+    
+    if (!state || !year) {
+        showError('Please select a state and enter a year');
+        return;
+    }
+
+    setLoading('single-btn', true);
+    
+    try {
+        const encodedState = encodeURIComponent(state);
+
+        // Fetch predicted demand
+        const response = await fetch(`/predict-demand?state=${encodedState}&year=${year}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            showError('Error: ' + data.error);
+            return;
+        }
+
+        displaySingleResults(data);
+        
+        // Fetch trend data
+        const trendResponse = await fetch(`/forecast/trend?state=${encodedState}`);
+        const trendData = await trendResponse.json();
+        
+        if (!trendData.error) {
+            displayTrendChart(trendData);
+        }
+    } catch (error) {
+        console.error('Prediction failed:', error);
+        showError('Failed to predict demand. Please try again.');
+    } finally {
+        setLoading('single-btn', false);
+    }
+}
+
+        // Display single prediction results
+        function displaySingleResults(data) {
+            const resultsDiv = document.getElementById('single-results');
+            resultsDiv.innerHTML = `
+                <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                    <h3 class="font-semibold text-emerald-800 mb-2">Prediction Result</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-emerald-600">${data.predicted_demand_gwh}</div>
+                            <div class="text-sm text-emerald-700">GWh</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-gray-700">${data.state}</div>
+                            <div class="text-sm text-gray-600">State</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-gray-700">${data.year}</div>
+                            <div class="text-sm text-gray-600">Year</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="trend-chart-container" class="bg-white rounded-lg shadow-lg border border-emerald-200">
+                    <div class="p-4 border-b border-emerald-200">
+                        <h3 class="font-semibold text-emerald-700">Historical Trend</h3>
+                    </div>
+                    <div class="p-4">
+                        <canvas id="trend-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            `;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Display trend chart
+        function displayTrendChart(trendData) {
+            const ctx = document.getElementById('trend-chart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendData.trend.map(item => item.year),
+                    datasets: [{
+                        label: 'Consumption (GWh)',
+                        data: trendData.trend.map(item => item.consumption_gwh),
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#059669',
+                        pointBorderColor: '#059669',
+                        pointRadius: 4,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+       // Compare states
+async function handleComparison() {
+    const stateA = document.getElementById('state-a').value;
+    const stateB = document.getElementById('state-b').value;
+    const year = document.getElementById('compare-year').value;
+    
+    if (!stateA || !stateB || !year) {
+        showError('Please select both states and enter a year');
+        return;
+    }
+
+    setLoading('compare-btn', true);
+    
+    try {
+        const encodedStateA = encodeURIComponent(stateA);
+        const encodedStateB = encodeURIComponent(stateB);
+
+        const response = await fetch(`/compare?stateA=${encodedStateA}&stateB=${encodedStateB}&year=${year}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            showError('Error: ' + data.error);
+            return;
+        }
+
+        displayComparisonResults(data);
+    } catch (error) {
+        console.error('Comparison failed:', error);
+        showError('Failed to compare states. Please try again.');
+    } finally {
+        setLoading('compare-btn', false);
+    }
+}
+
+        // Display comparison results
+        function displayComparisonResults(data) {
+            const resultsDiv = document.getElementById('compare-results');
+            const entries = Object.entries(data).filter(([key]) => key !== 'year');
+            
+            resultsDiv.innerHTML = `
+                <div class="bg-teal-50 p-4 rounded-lg border border-teal-200">
+                    <h3 class="font-semibold text-teal-800 mb-4">Comparison Result for ${data.year}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${entries.map(([key, value]) => `
+                            <div class="text-center bg-white p-3 rounded-lg">
+                                <div class="text-xl font-bold text-teal-600">
+                                    ${typeof value === 'number' ? value.toLocaleString() : value}
+                                </div>
+                                <div class="text-sm text-teal-700 capitalize">${key.replace(/_/g, ' ')}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Converter functions
+        function convertGwhToKwh() {
+            const gwhValue = document.getElementById('gwh-input').value;
+            const kwhInput = document.getElementById('kwh-input');
+            
+            if (gwhValue && !isNaN(gwhValue)) {
+                kwhInput.value = (parseFloat(gwhValue) * 1000000).toLocaleString();
+            } else {
+                kwhInput.value = '';
+            }
+        }
+
+        function convertKwhToGwh() {
+            const kwhValue = document.getElementById('kwh-input').value.replace(/,/g, '');
+            const gwhInput = document.getElementById('gwh-input');
+            
+            if (kwhValue && !isNaN(kwhValue)) {
+                gwhInput.value = (parseFloat(kwhValue) / 1000000).toString();
+            } else {
+                gwhInput.value = '';
+            }
+        }
+
+        // Utility functions
+        function setLoading(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            if (isLoading) {
+                button.disabled = true;
+                button.classList.add('loading');
+                button.textContent = 'Loading...';
+            } else {
+                button.disabled = false;
+                button.classList.remove('loading');
+                // Reset button text based on button ID
+                if (buttonId === 'solar-btn') {
+                    button.textContent = 'Analyze Solar Demand';
+                } else if (buttonId === 'single-btn') {
+                    button.textContent = 'Predict Demand';
+                } else if (buttonId === 'compare-btn') {
+                    button.textContent = 'Compare';
+                }
+            }
+        }
+
+        function showError(message) {
+            alert(message); // You can replace this with a more sophisticated error display
+        }
+    </script>
+</body>
+</html>
